@@ -1,0 +1,145 @@
+<html>
+<head>
+<title>Punch clock</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" integrity="sha256-h20CPZ0QyXlBuAw7A+KluUYx/3pK+c7lYEpqLTlxjYQ=" crossorigin="anonymous" />
+<link rel="stylesheet" type="text/css" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/7.13.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.13.2/firebase-database.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script src="app.js"></script>
+</head>
+<body>
+<h1>Punch clock</h1>
+<div id="table">
+<table class="table table-bordered" table style="width:90%" id="punchtable">
+        <tr id="header">
+        <th scope="col">Date</th>
+        <th scope="col">Punch in</th>
+        <th scope="col">Punch out</th>
+        <th scope="col">Time worked(mins)</th>
+        </tr>
+  </table>
+</div>
+<h3 id="total">Total hours worked</h3>
+<div id="button-ui">
+  <button type="button" class="btn btn-primary" id="punch-state" data-toggle="modal" data-target="#exampleModal" onclick="punch()">
+     Start your shift
+  </button>
+  <button type="button" class="btn btn-primary" id="manual"  data-toggle="modal" data-target="#enter_manually" onclick="punch()">
+    Enter missed punch
+  </button>
+</div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="punch-title-mod"><b>Punch in at</b></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="punch-body-mod">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" onclick="punched()" data-dismiss="modal">Yes</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <!-- Modal -->
+<div class="modal fade" id="duplicate-time" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"><b>Duplicate punch</b></h5>
+      </div>
+      <div class="modal-body">
+        A punch similar to the one you have entered already exists!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Okay</button>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Modal -->
+
+
+
+  <div class="modal fade" id="enter_manually" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="punch-title-mod"><b>Missed punch at</b></h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="punch-body-mod">
+          <p id="alert_msg"></p>
+            <input type="date" class="form-control" id="man_date">
+  
+            <div style="margin-top: 20px;" class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="">Punch in and out times</span>
+              </div>
+              <input type="time" class="form-control" value="12:00" id="man_in">
+              <input type="time" class="form-control" value="12:00" id="man_out">
+            </div>
+          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" onclick="putter()">Register punch</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="punch-title-mod"><b>Edit this punch</</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="punch-body-mod">
+          <p id="alerte_msg"></p>
+            <input type="date" class="form-control" id="edit_date">
+  
+            <div style="margin-top: 20px;" class="input-group">
+              <div class="input-group-prepend">
+                <span class="input-group-text" id="">Punch in and out times</span>
+              </div>
+              <input type="time" class="form-control" id="edit_in">
+              <input type="time" class="form-control" value="12:00" id="edit_out">
+            </div>
+          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" id="deleter" onclick="derow()">Delete</button>
+          <button type="button" class="btn btn-success" id="editor" onclick="edit()">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="about-card" style="margin-top: 50px;">
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title"><b>About punch clock</b></h5>
+        <h6 class="card-subtitle mb-2 text-muted">csc 130 project</h6>
+        <p class="card-text">Punch clock is a solution for individuals to record their volunteer hours or work hours digitally on the cload. The website uses a REST api called for <a href="#">Firebase database</a> to store punch information on the cloud. The website also uses <a href="#">Bootstrap API</a> to enhance the site with beautiful UI. Bootstrap is used in the table and in the cards UI. 
+        <br><b>Hope you enjoy Punch clock!</b>
+        </p>
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
